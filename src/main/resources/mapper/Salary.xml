@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shiaj.hr.mapper.SalaryMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.shiaj.hr.entity.Salary">
+        <id column="id" property="id"/>
+        <result column="jobCode" property="jobCode"/>
+        <result column="basicSalary" property="basicSalary"/>
+        <result column="subsidy" property="subsidy"/>
+        <result column="socialInsurance" property="socialInsurance"/>
+        <result column="accumulationFund" property="accumulationFund"/>
+        <result column="otherAdd" property="otherAdd"/>
+        <result column="otherMinus" property="otherMinus"/>
+        <result column="totalWage" property="totalWage"/>
+        <result column="yearMonth" property="yearMonth"/>
+        <result column="isFile" property="isFile"/>
+    </resultMap>
+
+    <select id="getAll" resultType="com.shiaj.hr.pojo.ao.SalaryAo">
+        SELECT
+        salary.id,
+        user.name,
+        user.jobCode,
+        salary.basicSalary,
+        salary.subsidy,
+        salary.socialInsurance,
+        salary.accumulationFund,
+        salary.otherAdd,
+        salary.otherMinus,
+        salary.totalWage,
+        salary.yearMonth,
+        salary.isFile
+        FROM salary salary
+        LEFT JOIN user user ON user.jobCode = salary.jobCode AND user.deleteFlag = 0
+        ORDER BY salary.id ASC
+    </select>
+
+    <select id="getSalaryByNameOrJobCode" resultType="com.shiaj.hr.pojo.ao.SalaryAo">
+        SELECT
+        salary.id,
+        user.name,
+        salary.jobCode,
+        salary.basicSalary,
+        salary.subsidy,
+        salary.socialInsurance,
+        salary.accumulationFund,
+        salary.otherAdd,
+        salary.otherMinus,
+        salary.totalWage,
+        salary.yearMonth,
+        salary.isFile
+        FROM salary salary
+        LEFT JOIN user ON salary.jobCode = user.jobCode
+        <if test="_parameter.get('searchStr') != null and !('').equals(_parameter.get('searchStr'))">
+            AND (user.name LIKE concat('%',#{searchStr},'%')
+            OR user.jobCode LIKE concat('%',#{searchStr},'%'))
+        </if>
+        WHERE salary.jobCode = user.jobCode
+        <if test="_parameter.get('yearMonth') != null and !('').equals(_parameter.get('yearMonth'))">
+            AND salary.yearMonth = #{yearMonth}
+        </if>
+        ORDER BY
+        salary.id desc
+    </select>
+
+    <select id="getSalaryAll" resultType="com.shiaj.hr.pojo.ao.SalaryAo">
+        SELECT
+        salary.id,
+        user.name,
+        user.jobCode,
+        salary.basicSalary,
+        salary.subsidy,
+        salary.socialInsurance,
+        salary.accumulationFund,
+        salary.otherAdd,
+        salary.otherMinus,
+        salary.totalWage,
+        salary.yearMonth,
+        salary.isFile
+        FROM salary salary
+        LEFT JOIN user user ON user.jobCode = salary.jobCode
+        WHERE
+        salary.jobCode = user.jobCode
+        order by
+        <if test="_parameter.get('sortName') != null and !('').equals(_parameter.get('sortName'))
+         and _parameter.get('sortValue') != null and !('').equals(_parameter.get('sortValue'))">
+            ${sortName} ${sortValue},
+        </if>
+        salary.id desc
+    </select>
+    <select id="getSalaryByTinme" resultType="com.shiaj.hr.pojo.ao.SalaryAo">
+        SELECT
+        salary.id,
+        user.name,
+        salary.jobCode,
+        salary.basicSalary,
+        salary.subsidy,
+        salary.socialInsurance,
+        salary.accumulationFund,
+        salary.otherAdd,
+        salary.otherMinus,
+        salary.totalWage,
+        salary.yearMonth,
+        salary.isFile
+        FROM salary salary
+        LEFT JOIN user ON salary.jobCode = user.jobCode
+        WHERE user.jobCode = #{jobCode}
+        <if test="_parameter.get('yearMonth') != null and !('').equals(_parameter.get('yearMonth'))">
+            AND salary.yearMonth = #{yearMonth}
+        </if>
+        ORDER BY
+        salary.id desc
+    </select>
+
+</mapper>

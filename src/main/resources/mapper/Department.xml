@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.shiaj.hr.mapper.DepartmentMapper">
+
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.shiaj.hr.entity.Department">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="parentDepart" property="parentDepart"/>
+        <result column="remark" property="remark"/>
+        <result column="deleteFlag" property="deleteFlag"/>
+    </resultMap>
+
+    <select id="getNameById" resultType="java.util.Map">
+        SELECT
+        d1.id,
+        d1.name,
+        d2.name as parentDepart,
+        d1.root,
+        d1.remark
+        FROM depart d1
+        LEFT JOIN depart d2 ON d1.parentDepart = d2.id AND d2.deleteFlag = 0
+        WHERE d1.deleteFlag = 0 AND d1.id = #{departId}
+    </select>
+
+    <select id="getAll" resultType="com.shiaj.hr.entity.Department">
+        SELECT
+        d1.id,
+        d1.name,
+        d2.name as parentDepart,
+        d1.root,
+        d1.remark
+        FROM depart d1
+        LEFT JOIN depart d2 ON d1.parentDepart = d2.id AND d2.deleteFlag = 0
+        WHERE d1.deleteFlag = 0
+    </select>
+
+    <select id="getDeptTree" resultType="com.shiaj.hr.pojo.ao.TreeDataVo">
+        SELECT
+        a.id,
+        a.name AS title,
+        a.parentDepart AS parentId,
+        SUM(
+          CASE
+            WHEN b.id IS NOT NULL
+            THEN 1
+            ELSE 0
+          END
+        ) AS hasChildren
+        FROM
+        depart a
+        LEFT JOIN depart b
+          ON b.parentDepart = a.id
+          AND b.deleteFlag = 0
+        WHERE a.deleteFlag = 0
+        GROUP BY a.id,
+        a.name,
+        a.parentDepart
+        ORDER BY a.id ASC
+    </select>
+</mapper>
+
